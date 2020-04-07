@@ -1,0 +1,89 @@
+version: '3.7'
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: ${PROJECT_NAME}-nginx_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - services-network
+
+  mysql:
+    image: mysql:5.7
+    container_name: ${PROJECT_NAME}-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/tuning.cnf:/etc/mysql/conf.d/tuning.cnf
+    networks:
+      - services-network
+      
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: ${PROJECT_NAME}-phpmyadmin
+    expose:
+      - "80"
+    depends_on:
+      - mysql
+    environment:
+      - PMA_HOST=${PROJECT_NAME}-mysql
+      - PMA_PORT=3306
+      - VIRTUAL_HOST=phpmyadmin.${PROJECT_NAME}.local
+    networks:
+      - services-network
+  
+  php-cli:
+    build:
+      context: php-cli
+      args:
+        - project_name=${PROJECT_NAME}
+    image: ${PROJECT_NAME}-php_cli
+    container_name: ${PROJECT_NAME}-php_cli
+    volumes:
+      - ./../:/var/www/html/${PROJECT_NAME}:cached
+      - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini
+    user: www-data
+    networks:
+      - services-network
+
+  php-fpm:
+    build:
+      context: php-fpm
+      args:
+        - project_name=${PROJECT_NAME}
+    image: ${PROJECT_NAME}-php_fpm
+    container_name: ${PROJECT_NAME}-php_fpm
+    depends_on:
+      - mysql
+    volumes:
+      - ./../:/var/www/html/${PROJECT_NAME}:cached
+      - ./php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ./php/conf.d/php.ini:/usr/local/etc/php/conf.d/php.ini
+    user: www-data
+    networks:
+      - services-network
+
+  nginx:
+    image: nginx:1.17.8-alpine
+    container_name: ${PROJECT_NAME}-nginx
+    depends_on:
+      - php-fpm
+    environment:
+      - VIRTUAL_HOST=admin.${PROJECT_NAME}.local
+    volumes:
+      - ./../:/var/www/html/${PROJECT_NAME}:cached
+      - ./nginx/vhost.conf:/etc/nginx/conf.d/${PROJECT_NAME}.conf
+    networks:
+      - services-network
+
+networks:
+  services-network:
+    name: ${PROJECT_NAME}-network
+    driver: bridge
