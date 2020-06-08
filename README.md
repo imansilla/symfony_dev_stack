@@ -32,8 +32,9 @@ It was designed to be used with **Symfony**, but it can be used with any other P
 
 1. Move to the `.docker` directory, where the `docker-compose.yml` file is located
 2. Run once `$ docker-compose run --rm php-cli composer create-project symfony/website-skeleton symfony`
-3. Run once `$ mv symfony/{.[!.],}* . ; rm -rf symfony`
-4. You can visit: 
+3. Go to the parent directory of `.docker`
+4. Run once `$ mv symfony/{.[!.],}* . ; rm -rf symfony`
+5. You can visit: 
   - `http://admin.${PROJECT_NAME}.local` 
   - `http://phpmyadmin.${PROJECT_NAME}.local`
 
