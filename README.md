@@ -20,12 +20,13 @@ It was designed to be used with **Symfony**, but it can be used with any other P
 
 ## Steps to Use
 
-1. Create the `.docker/.env` file, copying it from `.docker/.env.example`
-2. Replace the default environment variables values on `.docker/.env` file
-3. Replace `${PROJECT_NAME}` for the real value of the project name on `.docker/nginx/vhost.conf`
-4. Add entries to `/etc/hosts` (host machine) file for the locals domains specified in `VIRTUAL_HOST` variables inside `docker-compose.yml` 
+1. Move to the `.docker` directory, where the `docker-compose.yml` file is located
+2. Create the `.env` file, copying it from `.env.example`
+3. Replace the default environment variables values on `.env` file
+4. Replace `${PROJECT_NAME}` for the real value of the project name on `nginx/vhost.conf`
+5. Add entries to `/etc/hosts` (host machine) file for the locals domains specified in `VIRTUAL_HOST` variables inside `docker-compose.yml` 
     - `127.0.0.1 admin.${PROJECT_NAME}.local phpmyadmin.${PROJECT_NAME}.local` (replace `${PROJECT_NAME}` with the real value)
-5. Run `docker-compose up -d` 
+6. Run `docker-compose up -d` 
 
 ## Install Symfony Framework
 
